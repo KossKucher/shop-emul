@@ -22,12 +22,20 @@ public class TimeKeeper {
   private int hour;
   private Cashbox.Markup markup;
   
+  /**
+   * Private constructor, forbids creation of multiple instances.
+   */
   private TimeKeeper() {
     day = 1;
     hour = OPEN_TIME;
     markup = NORMAL_DAY;
   }
   
+  /**
+   * Singleton getter.
+   *
+   * @return current instance of this class if exists, otherwise initializes a new instance
+   */
   public static TimeKeeper get() {
     if (timeKeeper == null) {
       timeKeeper = new TimeKeeper();
@@ -35,6 +43,10 @@ public class TimeKeeper {
     return timeKeeper;
   }
   
+  /**
+   * Tracks time and triggers time dependent events.
+   * Triggers storage buy orders. Triggers markup updates.
+   */
   public void tickTock() {
     hour++;
     if (hour == CLOSE_TIME) {
@@ -45,18 +57,34 @@ public class TimeKeeper {
     updateMarkup();
   }
   
+  /**
+   * Generated getter.
+   */
   public Cashbox.Markup getMarkup() {
     return markup;
   }
   
+  /**
+   * Checks if month is elapsed.
+   *
+   * @return {@code boolean} true if more than 30 days are passed, otherwise false
+   */
   public boolean isMonthEnded() {
     return day > MONTH_LENGTH;
   }
   
+  /**
+   * Checks if current day is weekend day.
+   *
+   * @return {@code boolean} true if the day is 6th or 7th in the sequence, otherwise false
+   */
   private boolean isWeekend() {
     return (day % 7 == 0 || (day + 1) % 7 == 0);
   }
   
+  /**
+   * Updates markup according to time and day.
+   */
   private void updateMarkup() {
     switch (hour) {
       case 18:

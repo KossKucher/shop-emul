@@ -7,8 +7,15 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Database driver singleton.
+ *
+ * @author KossKucher
+ * @version 1.0
+ */
 public class DbManager {
   
+  /*config constants*/
   private static final int BUY_THRESHOLD = 10;
   private static final int BUY_AMOUNT = 150;
   private static final String BASE_FILE_NAME = "base.csv";
@@ -18,6 +25,10 @@ public class DbManager {
   private List<DbRecord> db;
   private File baseFile;
   
+  /**
+   * Private constructor.
+   * Reads the db file, init fields.
+   */
   private DbManager() {
     ClassLoader classLoader = getClass().getClassLoader();
     baseFile = new File(classLoader.getResource(BASE_FILE_NAME).getFile());
@@ -32,6 +43,12 @@ public class DbManager {
     }
   }
   
+  /**
+   * Singleton getter.
+   * Creates new instance when is run for the first time, else returns existing instance.
+   *
+   * @return instance of this class
+   */
   public static DbManager get() {
     if (dbManager == null) {
       dbManager = new DbManager();
@@ -39,18 +56,41 @@ public class DbManager {
     return dbManager;
   }
   
+  /**
+   * Gets db record.
+   *
+   * @param id {@code int} identifier of the db record
+   * @return {@link DbRecord} instance representing the db table line
+   */
   public DbRecord getRecord(int id) {
     return db.get(id);
   }
   
+  /**
+   * Checks if it is enough product to fulfil the order.
+   *
+   * @param id     {@code int} identifier of the db record
+   * @param number {@code int} quantity of the product to check against db
+   * @return {@code boolean} true if there is enough product, otherwise false
+   */
   public boolean isEnough(int id, int number) {
     return getRecord(id).getNumber() >= number;
   }
   
+  /**
+   * Checks for db size.
+   *
+   * @return {@code int} number of the records in db
+   */
   public int totalRecords() {
     return db.size();
   }
   
+  /**
+   * Wrapper method for order processing variants.
+   *
+   * @param order {@link Order} class to be processed against db
+   */
   public void process(Order order) {
     if (order.size() == 0) {
       return;
@@ -62,6 +102,11 @@ public class DbManager {
     }
   }
   
+  /**
+   * Processes sell orders against db. Decrements values in db.
+   *
+   * @param order {@link Order} defines type and amount of product
+   */
   private void processSell(Order order) {
     order.forEach((id, number) ->
                   {
@@ -73,6 +118,11 @@ public class DbManager {
                   });
   }
   
+  /**
+   * Processes buy product orders. Increments db values.
+   *
+   * @param order {@link Order} defines type and amount of product to process
+   */
   private void processBuy(Order order) {
     order.forEach((id, number) ->
                   {
@@ -81,6 +131,9 @@ public class DbManager {
                   });
   }
   
+  /**
+   * Generates buy order to fill up the storage and triggers processing by the {@link Cashbox}.
+   */
   public void refreshStorage() {
     Order order = new Order(Order.OrderType.BUY);
     for (DbRecord record : db) {
@@ -94,6 +147,9 @@ public class DbManager {
     }
   }
   
+  /**
+   * Writes current base state to the same csv file.
+   */
   public void backupBase() {
     try (Writer writer = new BufferedWriter(new FileWriter(baseFile));
          CSVWriter csvWriter = new CSVWriter(writer,

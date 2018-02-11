@@ -1,16 +1,23 @@
 package com.shop.emul;
 
-import com.opencsv.CSVReader;
-
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 
 import static com.shop.emul.Cashbox.Markup.WHOLESALE;
 
+/**
+ * Singleton, carries on finance operations, generates outputs.
+ *
+ * @author KossKucher
+ * @version 1.0
+ */
 public class Cashbox {
   
+  /*config constants*/
   private static final int WHOLESALE_THRESHOLD = 1;
   private static final String REPORT_FILENAME = "month_report.txt";
   
@@ -23,12 +30,20 @@ public class Cashbox {
   private double expense;
   private DbManager dbManager;
   
+  /**
+   * Default private constructor.
+   */
   private Cashbox() {
     dbManager = DbManager.get();
     sold = new int[dbManager.totalRecords()];
     bought = new int[dbManager.totalRecords()];
   }
   
+  /**
+   * Singleton getter.
+   *
+   * @return current instance of this class if exists, otherwise initializes a new instance
+   */
   public static Cashbox get() {
     if (cashbox == null) {
       cashbox = new Cashbox();
@@ -36,6 +51,11 @@ public class Cashbox {
     return cashbox;
   }
   
+  /**
+   * Wrapper for order processing methods.
+   *
+   * @param order {@link Order} to process
+   */
   public void process(Order order) {
     if (order.getOrderType() == Order.OrderType.BUY) {
       processBuy(order);
@@ -44,6 +64,11 @@ public class Cashbox {
     }
   }
   
+  /**
+   * Makes calculations and updates financial metrics and quantity. Increases values of income.
+   *
+   * @param order {@link Order} to process its values
+   */
   private void processSell(Order order) {
     if (order.size() == 0) {
       return;
@@ -59,6 +84,11 @@ public class Cashbox {
     System.out.println(makeReceipt(order));
   }
   
+  /**
+   * Makes calculations and updates financial metrics and quantities. Increases value of expense.
+   *
+   * @param order {@link Order} to process its values
+   */
   private void processBuy(Order order) {
     order.forEach((id, number) ->
                   {
@@ -68,6 +98,14 @@ public class Cashbox {
                   });
   }
   
+  /**
+   * Calculates product price based on the base price and markups.
+   *
+   * @param id     {@code int} id of the product
+   * @param number {@code int} quantity of the product
+   * @param markup {@code double} time based markup
+   * @return {@code double} rounded to cents price value
+   */
   private double calcPrice(int id, int number, double markup) {
     double basePrice = dbManager.getRecord(id).getBasePrice();
     double result = (number > WHOLESALE_THRESHOLD)
@@ -77,12 +115,24 @@ public class Cashbox {
     return roundToCents(result);
   }
   
+  /**
+   * Rounds floating point values to 2 decimal places to minimize calc errors.
+   *
+   * @param value {@code double} value to be rounded
+   * @return {@code double} rounded value
+   */
   private double roundToCents(double value) {
     BigDecimal bd = new BigDecimal(value);
     bd = bd.setScale(2, RoundingMode.HALF_UP);
     return bd.doubleValue();
   }
   
+  /**
+   * Creates a printable receipt of the order.
+   *
+   * @param order {@link Order} order to be processed
+   * @return {@link String} formatted receipt based on order values
+   */
   private String makeReceipt(Order order) {
     receiptCounter++;
     TimeKeeper timeKeeper = TimeKeeper.get();
@@ -104,6 +154,11 @@ public class Cashbox {
     return sb.toString();
   }
   
+  /**
+   * Creates a printable month report.
+   *
+   * @return {@link String} formatted month report
+   */
   private String makeReport() {
     StringBuilder sb = new StringBuilder();
     sb.append("Month report -------------------------------").append(System.lineSeparator());
@@ -127,6 +182,9 @@ public class Cashbox {
     return sb.toString();
   }
   
+  /**
+   * Writes month report to the file in project root directory.
+   */
   public void writeReport() {
     String monthReport = makeReport();
     File report = new File(System.getProperty("user.dir"), REPORT_FILENAME);
@@ -152,6 +210,9 @@ public class Cashbox {
     private double value;
     private String printable;
     
+    /**
+     * Default constructor.
+     */
     Markup(double value, String printable) {
       this.value = value;
       this.printable = printable;
@@ -161,6 +222,11 @@ public class Cashbox {
       return value;
     }
     
+    /**
+     * Overrides standard implementation to return printable markups.
+     *
+     * @return {@link String} markup in user friendly print format
+     */
     @Override
     public String toString() {
       return printable;
