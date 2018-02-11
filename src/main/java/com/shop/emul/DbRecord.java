@@ -1,6 +1,9 @@
 package com.shop.emul;
 
-import static com.shop.emul.DbRecord.Columns.*;
+import static com.shop.emul.DbRecord.Columns.BASE_PRICE;
+import static com.shop.emul.DbRecord.Columns.NUMBER;
+import static com.shop.emul.DbRecord.Columns.TITLE;
+import static com.shop.emul.DbRecord.Columns.VOLUME;
 
 /**
  * Represents db record entity.

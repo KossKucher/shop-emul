@@ -1,6 +1,8 @@
 package com.shop.emul;
 
-import static com.shop.emul.Cashbox.Markup.*;
+import static com.shop.emul.Cashbox.Markup.EVENING;
+import static com.shop.emul.Cashbox.Markup.NORMAL_DAY;
+import static com.shop.emul.Cashbox.Markup.WEEKEND_DAY;
 
 /**
  * Tracks time during work and triggers time dependent events.
