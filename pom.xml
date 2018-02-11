@@ -21,6 +21,19 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.shop.emul.ShopEmulator</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
@@ -40,6 +53,22 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <useDefaultExcludes>true</useDefaultExcludes>
+                            <directory>${project.basedir}</directory>
+                            <includes>
+                                <include>*.txt</include>
+                            </includes>
+                            <excludes>
+                                <exclude>*.xml</exclude>
+                                <exclude>*.iml</exclude>
+                            </excludes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -10,11 +10,6 @@ public class Order extends HashMap<Integer, Integer> {
     orderType = type;
   }
   
-  public enum OrderType {
-    SELL,
-    BUY
-  }
-  
   @Override
   public Integer put(Integer key, Integer value) {
     if (containsKey(key)) {
@@ -26,4 +21,10 @@ public class Order extends HashMap<Integer, Integer> {
   public OrderType getOrderType() {
     return orderType;
   }
+  
+  public enum OrderType {
+    SELL,
+    BUY
+  }
+  
 }

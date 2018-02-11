@@ -1,12 +1,12 @@
 package com.shop.emul;
 
-import static com.shop.emul.TimeKeeper.Markup.*;
+import static com.shop.emul.Cashbox.Markup.*;
 
 /**
- * Tracks time during work and controls the time dependent markups.
+ * Tracks time during work and triggers time dependent events.
  * Singleton class.
  *
- * @author Ricko
+ * @author KossKucher
  * @version 1.0
  */
 public class TimeKeeper {
@@ -20,7 +20,7 @@ public class TimeKeeper {
   
   private int day;
   private int hour;
-  private Markup markup;
+  private Cashbox.Markup markup;
   
   private TimeKeeper() {
     day = 1;
@@ -38,15 +38,15 @@ public class TimeKeeper {
   public void tickTock() {
     hour++;
     if (hour == CLOSE_TIME) {
+      DbManager.get().refreshStorage();
       day++;
       hour = OPEN_TIME;
-      //TODO: storage buy update method
     }
     updateMarkup();
   }
   
-  public double markup() {
-    return markup.getMarkup();
+  public Cashbox.Markup getMarkup() {
+    return markup;
   }
   
   public boolean isMonthEnded() {
@@ -61,34 +61,10 @@ public class TimeKeeper {
     switch (hour) {
       case 18:
       case 19:
-        markup = Markup.EVENING;
+        markup = EVENING;
         break;
       default:
-        markup = (isWeekend()) ? Markup.WEEKEND_DAY : Markup.NORMAL_DAY;
+        markup = (isWeekend()) ? WEEKEND_DAY : NORMAL_DAY;
     }
   }
-  
-  /**
-   * Represents all types of markup rates.
-   *
-   * @author Ricko
-   * @version 1.0
-   */
-  public enum Markup {
-    NORMAL_DAY(1.1d),
-    WEEKEND_DAY(1.15d),
-    EVENING(1.08d),
-    WHOLESALE(1.07d);
-    
-    private double markup;
-    
-    Markup(double markup) {
-      this.markup = markup;
-    }
-    
-    public double getMarkup() {
-      return markup;
-    }
-  }
-  
 }

@@ -6,8 +6,6 @@ public class DbRecord {
   
   private int id;
   private int number;
-  private int soldNumber;
-  private int boughtNumber;
   private double basePrice;
   private String title;
   private String[] initBaseRecord;
@@ -46,20 +44,8 @@ public class DbRecord {
     return initBaseRecord;
   }
   
-  public void updateSold(int number) {
-    soldNumber += number;
-  }
-  
-  public void updateBougt(int number) {
-    boughtNumber += number;
-  }
-  
-  public int getSoldNumber() {
-    return soldNumber;
-  }
-  
-  public int getBoughtNumber() {
-    return boughtNumber;
+  public void updateInitRecord() {
+    initBaseRecord[NUMBER.ordinal()] = " " + Integer.toString(number);
   }
   
   enum Columns {
