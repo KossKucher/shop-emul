@@ -1,4 +1,24 @@
 Shop emulator program.
-Style used: Google - https://google.github.io/styleguide/javaguide.html
+Code style used: https://google.github.io/styleguide/javaguide.html
 
-Month report is generated into {$project.basedir}/month_report.txt
+Base file name: 'base.csv'
+Base file is read from the "user.dir" location.
+(Check java "user.dir" system property for more details).
+If no such file provided then prepacked base file will be used.
+Month report is generated into "user.dir"/month_report.txt file.
+Base file is backed up into "user.dir" location. Existing base file will be updated.
+
+
+How to run in terminal.
+
+Preconditions:
+Maven and JDK are installed.
+
+Steps:
+1. Clone this repo to some {dir}
+2. cd {dir}
+3. mvn package
+4. cd target
+5. java -Dfile.encoding=UTF-8 -jar shop-emul-1.1-jar-with-dependencies.jar
+
+If this steps are followed the report and refreshed base will be written to /target dir.

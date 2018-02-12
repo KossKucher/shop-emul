@@ -183,7 +183,7 @@ public class Cashbox {
   }
   
   /**
-   * Writes month report to the file in project root directory.
+   * Writes month report to the file inside "user.dir" directory.
    */
   public void writeReport() {
     String monthReport = makeReport();

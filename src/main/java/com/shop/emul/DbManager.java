@@ -3,11 +3,14 @@ package com.shop.emul;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,23 +31,35 @@ public class DbManager {
   private static DbManager dbManager = null;
   
   private List<DbRecord> db;
-  private File baseFile;
   
   /**
    * Private constructor.
-   * Reads the db file, init fields.
+   * Tries to read the db file from "user.dir" location first.
+   * If no base in the "user.dir" location, then default base file is loaded.
    */
   private DbManager() {
-    ClassLoader classLoader = getClass().getClassLoader();
-    baseFile = new File(classLoader.getResource(BASE_FILE_NAME).getFile());
     db = new ArrayList<>();
-    try (CSVReader reader = new CSVReader(new FileReader(baseFile))) {
-      String[] line;
-      while ((line = reader.readNext()) != null) {
-        db.add(new DbRecord(db.size(), line));
+    File baseFile = new File(System.getProperty("user.dir"), BASE_FILE_NAME);
+    if (baseFile.exists()) {
+      try (CSVReader reader = new CSVReader(new FileReader(baseFile))) {
+        String[] line;
+        while ((line = reader.readNext()) != null) {
+          db.add(new DbRecord(db.size(), line));
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
       }
-    } catch (IOException e) {
-      e.printStackTrace();
+    } else {
+      try (InputStream in = getClass().getResourceAsStream("/" + BASE_FILE_NAME);
+           BufferedReader br = new BufferedReader(new InputStreamReader(in));
+           CSVReader reader = new CSVReader(br)) {
+        String[] line;
+        while ((line = reader.readNext()) != null) {
+          db.add(new DbRecord(db.size(), line));
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
   }
   
@@ -153,9 +168,10 @@ public class DbManager {
   }
   
   /**
-   * Writes current base state to the same csv file.
+   * Writes current base state to the csv file.
    */
   public void backupBase() {
+    File baseFile = new File(System.getProperty("user.dir"), BASE_FILE_NAME);
     try (Writer writer = new BufferedWriter(new FileWriter(baseFile));
          CSVWriter csvWriter = new CSVWriter(writer,
                                              CSVWriter.DEFAULT_SEPARATOR,
