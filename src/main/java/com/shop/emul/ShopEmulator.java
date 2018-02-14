@@ -30,5 +30,4 @@ public class ShopEmulator {
     cashbox.writeReport();
     dbManager.backupBase();
   }
-  
 }

@@ -4,10 +4,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Properties;
 
 import static com.shop.emul.Cashbox.Markup.WHOLESALE;
+import static com.shop.emul.Config.PROPERTIES_FILE;
+import static com.shop.emul.Config.REPORT_FILENAME;
+import static com.shop.emul.Config.WHOLESALE_THRESHOLD;
 
 /**
  * Singleton, carries on finance operations, generates outputs.
@@ -17,11 +22,10 @@ import static com.shop.emul.Cashbox.Markup.WHOLESALE;
  */
 public class Cashbox {
   
-  /*config constants*/
-  private static final int WHOLESALE_THRESHOLD = 1;
-  private static final String REPORT_FILENAME = "month_report.txt";
-  
   private static Cashbox cashbox = null;
+  
+  private final int wholesaleThreshold;
+  private final String reportFilename;
   
   private int receiptCounter;
   private int[] sold;
@@ -37,6 +41,15 @@ public class Cashbox {
     dbManager = DbManager.get();
     sold = new int[dbManager.totalRecords()];
     bought = new int[dbManager.totalRecords()];
+    Properties prop = new Properties();
+    try (InputStream in = getClass().getResourceAsStream("/" + PROPERTIES_FILE.getDefault())) {
+      prop.load(in);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    wholesaleThreshold = Integer.parseInt(prop.getProperty(WHOLESALE_THRESHOLD.name(),
+                                                           WHOLESALE_THRESHOLD.getDefault()));
+    reportFilename = prop.getProperty(REPORT_FILENAME.name(), REPORT_FILENAME.getDefault());
   }
   
   /**
@@ -108,10 +121,10 @@ public class Cashbox {
    */
   private double calcPrice(int id, int number, double markup) {
     double basePrice = dbManager.getRecord(id).getBasePrice();
-    double result = (number > WHOLESALE_THRESHOLD)
-                    ? (WHOLESALE_THRESHOLD * (basePrice * markup))
-                            + ((number - WHOLESALE_THRESHOLD) * (basePrice * WHOLESALE.getValue()))
-                    : WHOLESALE_THRESHOLD * (basePrice * markup);
+    double result = (number > wholesaleThreshold)
+                    ? (wholesaleThreshold * (basePrice * markup))
+                            + ((number - wholesaleThreshold) * (basePrice * WHOLESALE.getValue()))
+                    : wholesaleThreshold * (basePrice * markup);
     return roundToCents(result);
   }
   
@@ -145,7 +158,7 @@ public class Cashbox {
                     sb.append(String.format("\t%s x %d = %.2f (Markups: %s",
                                             dbManager.getRecord(id).getTitle(),
                                             number, sum, timeKeeper.getMarkup().toString()));
-                    if (number > WHOLESALE_THRESHOLD) {
+                    if (number > wholesaleThreshold) {
                       sb.append(", ").append(WHOLESALE.toString());
                     }
                     sb.append(")").append(System.lineSeparator());
@@ -183,11 +196,11 @@ public class Cashbox {
   }
   
   /**
-   * Writes month report to the file in project root directory.
+   * Writes month report to the file inside "user.dir" directory.
    */
   public void writeReport() {
     String monthReport = makeReport();
-    File report = new File(System.getProperty("user.dir"), REPORT_FILENAME);
+    File report = new File(System.getProperty("user.dir"), reportFilename);
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(report))) {
       writer.write(monthReport);
     } catch (IOException e) {
