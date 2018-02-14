@@ -1,8 +1,16 @@
 package com.shop.emul;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import static com.shop.emul.Cashbox.Markup.EVENING;
 import static com.shop.emul.Cashbox.Markup.NORMAL_DAY;
 import static com.shop.emul.Cashbox.Markup.WEEKEND_DAY;
+import static com.shop.emul.Config.CLOSE_TIME;
+import static com.shop.emul.Config.MONTH_LENGTH;
+import static com.shop.emul.Config.OPEN_TIME;
+import static com.shop.emul.Config.PROPERTIES_FILE;
 
 /**
  * Tracks time during work and triggers time dependent events.
@@ -13,12 +21,11 @@ import static com.shop.emul.Cashbox.Markup.WEEKEND_DAY;
  */
 public class TimeKeeper {
   
-  /*constants*/
-  private static final int MONTH_LENGTH = 30;
-  private static final int OPEN_TIME = 8;
-  private static final int CLOSE_TIME = 21;
-  
   private static TimeKeeper timeKeeper = null;
+  
+  private final int closeTime;
+  private final int openTime;
+  private final int monthLength;
   
   private int day;
   private int hour;
@@ -28,8 +35,18 @@ public class TimeKeeper {
    * Private constructor, forbids creation of multiple instances.
    */
   private TimeKeeper() {
+    Properties prop = new Properties();
+    try (InputStream in = getClass().getResourceAsStream("/" + PROPERTIES_FILE.getDefault())) {
+      prop.load(in);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    monthLength = Integer.parseInt(prop.getProperty(MONTH_LENGTH.name(),
+                                                    MONTH_LENGTH.getDefault()));
+    openTime = Integer.parseInt(prop.getProperty(OPEN_TIME.name(), OPEN_TIME.getDefault()));
+    closeTime = Integer.parseInt(prop.getProperty(CLOSE_TIME.name(), CLOSE_TIME.getDefault()));
     day = 1;
-    hour = OPEN_TIME;
+    hour = openTime;
     markup = NORMAL_DAY;
   }
   
@@ -51,10 +68,10 @@ public class TimeKeeper {
    */
   public void tickTock() {
     hour++;
-    if (hour == CLOSE_TIME) {
+    if (hour == closeTime) {
       DbManager.get().refreshStorage();
       day++;
-      hour = OPEN_TIME;
+      hour = openTime;
     }
     updateMarkup();
   }
@@ -72,7 +89,7 @@ public class TimeKeeper {
    * @return {@code boolean} true if more than 30 days are passed, otherwise false
    */
   public boolean isMonthEnded() {
-    return day > MONTH_LENGTH;
+    return day > monthLength;
   }
   
   /**

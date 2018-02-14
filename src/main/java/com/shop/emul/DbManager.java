@@ -14,6 +14,12 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+
+import static com.shop.emul.Config.BASE_FILE_NAME;
+import static com.shop.emul.Config.BUY_AMOUNT;
+import static com.shop.emul.Config.BUY_THRESHOLD;
+import static com.shop.emul.Config.PROPERTIES_FILE;
 
 /**
  * Database driver singleton.
@@ -23,12 +29,11 @@ import java.util.List;
  */
 public class DbManager {
   
-  /*config constants*/
-  private static final int BUY_THRESHOLD = 10;
-  private static final int BUY_AMOUNT = 150;
-  private static final String BASE_FILE_NAME = "base.csv";
-  
   private static DbManager dbManager = null;
+  
+  private final int buyThreshold;
+  private final int buyAmount;
+  private final String baseFileName;
   
   private List<DbRecord> db;
   
@@ -38,8 +43,18 @@ public class DbManager {
    * If no base in the "user.dir" location, then default base file is loaded.
    */
   private DbManager() {
+    Properties prop = new Properties();
+    try (InputStream in = getClass().getResourceAsStream("/" + PROPERTIES_FILE.getDefault())) {
+      prop.load(in);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    buyThreshold = Integer.parseInt(prop.getProperty(BUY_THRESHOLD.name(),
+                                                     BUY_THRESHOLD.getDefault()));
+    buyAmount = Integer.parseInt(prop.getProperty(BUY_AMOUNT.name(), BUY_AMOUNT.getDefault()));
+    baseFileName = prop.getProperty(BASE_FILE_NAME.name(), BASE_FILE_NAME.getDefault());
     db = new ArrayList<>();
-    File baseFile = new File(System.getProperty("user.dir"), BASE_FILE_NAME);
+    File baseFile = new File(System.getProperty("user.dir"), baseFileName);
     if (baseFile.exists()) {
       try (CSVReader reader = new CSVReader(new FileReader(baseFile))) {
         String[] line;
@@ -50,7 +65,7 @@ public class DbManager {
         e.printStackTrace();
       }
     } else {
-      try (InputStream in = getClass().getResourceAsStream("/" + BASE_FILE_NAME);
+      try (InputStream in = getClass().getResourceAsStream("/" + baseFileName);
            BufferedReader br = new BufferedReader(new InputStreamReader(in));
            CSVReader reader = new CSVReader(br)) {
         String[] line;
@@ -157,8 +172,8 @@ public class DbManager {
   public void refreshStorage() {
     Order order = new Order(Order.OrderType.BUY);
     for (DbRecord record : db) {
-      if (record.getNumber() < BUY_THRESHOLD) {
-        order.put(record.getId(), BUY_AMOUNT);
+      if (record.getNumber() < buyThreshold) {
+        order.put(record.getId(), buyAmount);
       }
     }
     if (order.size() > 0) {
@@ -171,7 +186,7 @@ public class DbManager {
    * Writes current base state to the csv file.
    */
   public void backupBase() {
-    File baseFile = new File(System.getProperty("user.dir"), BASE_FILE_NAME);
+    File baseFile = new File(System.getProperty("user.dir"), baseFileName);
     try (Writer writer = new BufferedWriter(new FileWriter(baseFile));
          CSVWriter csvWriter = new CSVWriter(writer,
                                              CSVWriter.DEFAULT_SEPARATOR,
