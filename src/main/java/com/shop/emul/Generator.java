@@ -10,7 +10,9 @@ import java.util.Random;
  */
 public abstract class Generator {
   
-  private static final int BUYERS_RANDOM_BOUND = 10;
+  private static final int BUYERS_RANDOM_BOUND = Integer
+          .parseInt(System.getProperty(Config.BUYERS_RANDOM_BOUND.name(),
+                                       Config.BUYERS_RANDOM_BOUND.getDefault()));
   
   private static Random random;
   

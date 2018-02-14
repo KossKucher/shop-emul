@@ -14,12 +14,10 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import static com.shop.emul.Config.BASE_FILE_NAME;
 import static com.shop.emul.Config.BUY_AMOUNT;
 import static com.shop.emul.Config.BUY_THRESHOLD;
-import static com.shop.emul.Config.PROPERTIES_FILE;
 
 /**
  * Database driver singleton.
@@ -43,16 +41,10 @@ public class DbManager {
    * If no base in the "user.dir" location, then default base file is loaded.
    */
   private DbManager() {
-    Properties prop = new Properties();
-    try (InputStream in = getClass().getResourceAsStream("/" + PROPERTIES_FILE.getDefault())) {
-      prop.load(in);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    buyThreshold = Integer.parseInt(prop.getProperty(BUY_THRESHOLD.name(),
-                                                     BUY_THRESHOLD.getDefault()));
-    buyAmount = Integer.parseInt(prop.getProperty(BUY_AMOUNT.name(), BUY_AMOUNT.getDefault()));
-    baseFileName = prop.getProperty(BASE_FILE_NAME.name(), BASE_FILE_NAME.getDefault());
+    buyThreshold = Integer.parseInt(System.getProperty(BUY_THRESHOLD.name(),
+                                                       BUY_THRESHOLD.getDefault()));
+    buyAmount = Integer.parseInt(System.getProperty(BUY_AMOUNT.name(), BUY_AMOUNT.getDefault()));
+    baseFileName = System.getProperty(BASE_FILE_NAME.name(), BASE_FILE_NAME.getDefault());
     db = new ArrayList<>();
     File baseFile = new File(System.getProperty("user.dir"), baseFileName);
     if (baseFile.exists()) {

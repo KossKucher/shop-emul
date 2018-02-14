@@ -1,16 +1,11 @@
 package com.shop.emul;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import static com.shop.emul.Cashbox.Markup.EVENING;
 import static com.shop.emul.Cashbox.Markup.NORMAL_DAY;
 import static com.shop.emul.Cashbox.Markup.WEEKEND_DAY;
 import static com.shop.emul.Config.CLOSE_TIME;
 import static com.shop.emul.Config.MONTH_LENGTH;
 import static com.shop.emul.Config.OPEN_TIME;
-import static com.shop.emul.Config.PROPERTIES_FILE;
 
 /**
  * Tracks time during work and triggers time dependent events.
@@ -35,16 +30,10 @@ public class TimeKeeper {
    * Private constructor, forbids creation of multiple instances.
    */
   private TimeKeeper() {
-    Properties prop = new Properties();
-    try (InputStream in = getClass().getResourceAsStream("/" + PROPERTIES_FILE.getDefault())) {
-      prop.load(in);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    monthLength = Integer.parseInt(prop.getProperty(MONTH_LENGTH.name(),
-                                                    MONTH_LENGTH.getDefault()));
-    openTime = Integer.parseInt(prop.getProperty(OPEN_TIME.name(), OPEN_TIME.getDefault()));
-    closeTime = Integer.parseInt(prop.getProperty(CLOSE_TIME.name(), CLOSE_TIME.getDefault()));
+    monthLength = Integer.parseInt(System.getProperty(MONTH_LENGTH.name(),
+                                                      MONTH_LENGTH.getDefault()));
+    openTime = Integer.parseInt(System.getProperty(OPEN_TIME.name(), OPEN_TIME.getDefault()));
+    closeTime = Integer.parseInt(System.getProperty(CLOSE_TIME.name(), CLOSE_TIME.getDefault()));
     day = 1;
     hour = openTime;
     markup = NORMAL_DAY;

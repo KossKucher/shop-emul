@@ -9,6 +9,10 @@ package com.shop.emul;
  */
 public class ShopEmulator {
   
+  static {
+    new PropertiesReader(Config.PROPERTIES_FILE.getDefault()).pushToSystem();
+  }
+  
   /**
    * Main entry point method.
    *
