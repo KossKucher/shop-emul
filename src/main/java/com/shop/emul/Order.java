@@ -1,33 +1,46 @@
 package com.shop.emul;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Customized Map, represents an order entity.
+ * Wrapper to a Map, represents an order entity.
  */
-public class Order extends HashMap<Integer, Integer> {
+public class Order {
   
-  private OrderType orderType;
+  private final OrderType orderType;
+  
+  private Map<Integer, Integer> order;
   
   /**
    * Constructor
    */
   public Order(OrderType type) {
     orderType = type;
+    order = new HashMap<>();
   }
   
   /**
-   * Customized put method to increment mapped values instead of overwrite.
+   * Puts single product to the order. Increments number if this product is already added.
    *
-   * @param key   {@code int} to be used as a key
-   * @param value {@code int} to be used as a value mapped to key
+   * @param id     {@code int} product id
+   * @param number {@code int} product quantity
    */
-  @Override
-  public Integer put(Integer key, Integer value) {
-    if (containsKey(key)) {
-      return super.put(key, get(key) + value);
+  public void add(int id, int number) {
+    if (order.containsKey(id)) {
+      order.put(id, order.get(id) + number);
+    } else {
+      order.put(id, number);
     }
-    return super.put(key, value);
+  }
+  
+  /**
+   * Gets copy of the base map.
+   *
+   * @return new {@link HashMap} which contains values from base map.
+   */
+  public Map<Integer, Integer> getContents() {
+    return new HashMap<>(order);
   }
   
   /**

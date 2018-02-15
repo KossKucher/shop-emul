@@ -119,7 +119,7 @@ public class DbManager {
    * @param order {@link Order} class to be processed against db
    */
   public void process(Order order) {
-    if (order.size() == 0) {
+    if (order.getContents().size() == 0) {
       return;
     }
     if (order.getOrderType() == Order.OrderType.BUY) {
@@ -135,7 +135,8 @@ public class DbManager {
    * @param order {@link Order} defines type and amount of product
    */
   private void processSell(Order order) {
-    order.forEach((id, number) ->
+    order.getContents()
+         .forEach((id, number) ->
                   {
                     DbRecord record = getRecord(id);
                     if (record.getNumber() < number) {
@@ -151,11 +152,11 @@ public class DbManager {
    * @param order {@link Order} defines type and amount of product to process
    */
   private void processBuy(Order order) {
-    order.forEach((id, number) ->
-                  {
-                    DbRecord record = getRecord(id);
-                    record.setNumber(record.getNumber() + number);
-                  });
+    order.getContents().forEach((id, number) ->
+                                {
+                                  DbRecord record = getRecord(id);
+                                  record.setNumber(record.getNumber() + number);
+                                });
   }
   
   /**
@@ -165,10 +166,10 @@ public class DbManager {
     Order order = new Order(Order.OrderType.BUY);
     for (DbRecord record : db) {
       if (record.getNumber() < buyThreshold) {
-        order.put(record.getId(), buyAmount);
+        order.add(record.getId(), buyAmount);
       }
     }
-    if (order.size() > 0) {
+    if (order.getContents().size() > 0) {
       process(order);
       Cashbox.get().process(order);
     }

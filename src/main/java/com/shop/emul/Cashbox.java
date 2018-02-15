@@ -74,17 +74,17 @@ public class Cashbox {
    * @param order {@link Order} to process its values
    */
   private void processSell(Order order) {
-    if (order.size() == 0) {
+    if (order.getContents().size() == 0) {
       return;
     }
     double markup = TimeKeeper.get().getMarkup().getValue();
-    order.forEach((id, number) ->
-                  {
-                    double sum = calcPrice(id, number, markup);
-                    sold[id] += number;
-                    income += sum;
-                    roundToCents(income);
-                  });
+    order.getContents().forEach((id, number) ->
+                                {
+                                  double sum = calcPrice(id, number, markup);
+                                  sold[id] += number;
+                                  income += sum;
+                                  roundToCents(income);
+                                });
     System.out.println(makeReceipt(order));
   }
   
@@ -94,12 +94,12 @@ public class Cashbox {
    * @param order {@link Order} to process its values
    */
   private void processBuy(Order order) {
-    order.forEach((id, number) ->
-                  {
-                    bought[id] += number;
-                    expense += dbManager.getRecord(id).getBasePrice() * number;
-                    roundToCents(expense);
-                  });
+    order.getContents().forEach((id, number) ->
+                                {
+                                  bought[id] += number;
+                                  expense += dbManager.getRecord(id).getBasePrice() * number;
+                                  roundToCents(expense);
+                                });
   }
   
   /**
@@ -125,7 +125,7 @@ public class Cashbox {
    * @param value {@code double} value to be rounded
    * @return {@code double} rounded value
    */
-  private double roundToCents(double value) {
+  private static double roundToCents(double value) {
     BigDecimal bd = new BigDecimal(value);
     bd = bd.setScale(2, RoundingMode.HALF_UP);
     return bd.doubleValue();
@@ -143,7 +143,8 @@ public class Cashbox {
     StringBuilder sb = new StringBuilder();
     sb.append("Receipt #").append(receiptCounter).append(System.lineSeparator());
     double markup = timeKeeper.getMarkup().getValue();
-    order.forEach((id, number) ->
+    order.getContents()
+         .forEach((id, number) ->
                   {
                     double sum = calcPrice(id, number, markup);
                     sb.append(String.format("\t%s x %d = %.2f (Markups: %s",
