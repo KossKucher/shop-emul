@@ -23,7 +23,7 @@ public class ShopEmulator {
     OrderProcessor database = DbManager.get();
     OrderProcessor cashbox = Cashbox.get();
     Order order;
-    while (!calendar.isMonthEnded()) {
+    while (calendar.isMonthAlive()) {
       for (int i = 0, j = Generator.randBuyers(); i < j; i++) {
         order = Generator.genOrder();
         database.process(order);

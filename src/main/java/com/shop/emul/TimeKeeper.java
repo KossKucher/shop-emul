@@ -62,7 +62,7 @@ public class TimeKeeper {
       DbManager.get().refreshStorage();
       day++;
       hour = openTime;
-      if (!isMonthEnded()) {
+      if (isMonthAlive()) {
         System.out.println("--- Day " + day + " ---" + System.lineSeparator());
       }
     }
@@ -81,8 +81,8 @@ public class TimeKeeper {
    *
    * @return {@code boolean} true if more than 30 days are passed, otherwise false
    */
-  public boolean isMonthEnded() {
-    return day > monthLength;
+  public boolean isMonthAlive() {
+    return day < monthLength;
   }
   
   /**
