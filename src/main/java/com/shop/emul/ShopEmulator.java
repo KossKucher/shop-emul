@@ -16,22 +16,22 @@ public class ShopEmulator {
   /**
    * Main entry point method.
    *
-   * @param args {@code String[]} array of command line parameter
+   * @param args {@code String[]} array of command line parameters
    */
   public static void main(String[] args) {
-    TimeKeeper timeKeeper = TimeKeeper.get();
-    DbManager dbManager = DbManager.get();
-    Cashbox cashbox = Cashbox.get();
+    TimeKeeper calendar = TimeKeeper.get();
+    OrderProcessor database = DbManager.get();
+    OrderProcessor cashbox = Cashbox.get();
     Order order;
-    while (!timeKeeper.isMonthEnded()) {
+    while (!calendar.isMonthEnded()) {
       for (int i = 0, j = Generator.randBuyers(); i < j; i++) {
         order = Generator.genOrder();
-        dbManager.process(order);
+        database.process(order);
         cashbox.process(order);
       }
-      timeKeeper.tickTock();
+      calendar.tickTock();
     }
-    cashbox.writeReport();
-    dbManager.backupBase();
+    cashbox.extractData();
+    database.extractData();
   }
 }

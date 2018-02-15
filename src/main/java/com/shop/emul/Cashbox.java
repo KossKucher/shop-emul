@@ -17,7 +17,7 @@ import static com.shop.emul.Config.WHOLESALE_THRESHOLD;
  * @author KossKucher
  * @version 1.0
  */
-public class Cashbox {
+public class Cashbox implements OrderProcessor {
   
   private static Cashbox cashbox = null;
   
@@ -56,11 +56,16 @@ public class Cashbox {
   }
   
   /**
+   * Implementation of method defined in {@link OrderProcessor}.
    * Wrapper for order processing methods.
    *
-   * @param order {@link Order} to process
+   * @param order {@link Order} to be processed
    */
+  @Override
   public void process(Order order) {
+    if (order.getContents().size() == 0) {
+      return;
+    }
     if (order.getOrderType() == Order.OrderType.BUY) {
       processBuy(order);
     } else {
@@ -190,7 +195,7 @@ public class Cashbox {
   /**
    * Writes month report to the file inside "user.dir" directory.
    */
-  public void writeReport() {
+  private void writeReport() {
     String monthReport = makeReport();
     File report = new File(System.getProperty("user.dir"), reportFilename);
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(report))) {
@@ -198,6 +203,15 @@ public class Cashbox {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+  
+  /**
+   * Implements method defined in {@link OrderProcessor}.
+   * Wrapper for data output methods.
+   */
+  @Override
+  public void extractData() {
+    writeReport();
   }
   
   /**

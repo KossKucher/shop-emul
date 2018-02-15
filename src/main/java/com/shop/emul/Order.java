@@ -37,7 +37,7 @@ public class Order {
   /**
    * Gets copy of the base map.
    *
-   * @return new {@link HashMap} which contains values from base map.
+   * @return new {@link HashMap} which contains values from the base map.
    */
   public Map<Integer, Integer> getContents() {
     return new HashMap<>(order);

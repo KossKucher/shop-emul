@@ -25,7 +25,7 @@ import static com.shop.emul.Config.BUY_THRESHOLD;
  * @author KossKucher
  * @version 1.0
  */
-public class DbManager {
+public class DbManager implements OrderProcessor {
   
   private static DbManager dbManager = null;
   
@@ -114,10 +114,12 @@ public class DbManager {
   }
   
   /**
+   * {@link OrderProcessor} interface implementation.
    * Wrapper method for order processing variants.
    *
    * @param order {@link Order} class to be processed against db
    */
+  @Override
   public void process(Order order) {
     if (order.getContents().size() == 0) {
       return;
@@ -178,7 +180,7 @@ public class DbManager {
   /**
    * Writes current base state to the csv file.
    */
-  public void backupBase() {
+  private void backupBase() {
     File baseFile = new File(System.getProperty("user.dir"), baseFileName);
     try (Writer writer = new BufferedWriter(new FileWriter(baseFile));
          CSVWriter csvWriter = new CSVWriter(writer,
@@ -194,5 +196,14 @@ public class DbManager {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+  
+  /**
+   * {@link OrderProcessor} interface implementation.
+   * Wrapper for data export methods.
+   */
+  @Override
+  public void extractData() {
+    backupBase();
   }
 }
