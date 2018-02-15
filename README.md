@@ -1,4 +1,5 @@
 Shop emulator program.
+
 Code style used: https://google.github.io/styleguide/javaguide.html
 
 Base file name: 'base.csv'
