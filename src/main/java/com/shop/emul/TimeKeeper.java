@@ -37,6 +37,7 @@ public class TimeKeeper {
     day = 1;
     hour = openTime;
     markup = NORMAL_DAY;
+    System.out.println("--- Day " + day + " ---" + System.lineSeparator());
   }
   
   /**
@@ -61,6 +62,9 @@ public class TimeKeeper {
       DbManager.get().refreshStorage();
       day++;
       hour = openTime;
+      if (!isMonthEnded()) {
+        System.out.println("--- Day " + day + " ---" + System.lineSeparator());
+      }
     }
     updateMarkup();
   }
